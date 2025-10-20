@@ -1,38 +1,48 @@
-import React, { useState } from 'react'
-import Button from './Button'
+import React, { useState } from 'react';
+import Button from './Button';
 
-const CharacterCard = ({producto, onAgregar}) => {
- 
-  const [cantidad,setCantidad] = useState(1);
-  
-  const handleChangeCantidad = (e) =>{
-    setCantidad(parseInt(e.target.value))
-  }
+const CharacterCard = ({ producto, onAgregar }) => {
+  const [cantidad, setCantidad] = useState(1);
+  const [expanded, setExpanded] = useState(false);
 
-  const incrementar =()=>{
-    setCantidad(cantidad + 1 )
-  }
-  const decrementar = ()=>{
-    setCantidad(cantidad - 1 )
-  }
+  const incrementar = () => setCantidad(c => Math.min(c + 1, producto.stock));
+  const decrementar = () => setCantidad(c => Math.max(1, c - 1));
 
+  const toggleExpand = () => setExpanded(e => !e);
 
   return (
-    <div  className='CharacterCard'>
-        <img src={producto.imagen} alt="" />
-        <h3>Nombre: {producto.nombre}</h3>
-        <p>Descripcion: {producto.descripcion}</p>
-        <p>Disponible: {producto.stock}</p>
-        <p>Precio: $ {producto.precio}</p>
-        <span>
-          <label htmlFor=""><button onClick={decrementar}>-</button></label>
-          <label htmlFor="">{cantidad}</label>
-         <label htmlFor=""><button onClick={incrementar}>+</button></label>
-        </span>
-        
-        <Button onClick={() => onAgregar(producto,cantidad) }/>
-    </div>
-  )
-}
+    <div className={`card ${expanded ? 'card--expanded' : ''}`}>
+      <div className="card__img">
+        <img src={producto.imagen} alt={producto.nombre} loading="lazy" />
+      </div>
+      <div className="card__body">
+        <h3 className="card__title">{producto.nombre}</h3>
+        <p className={`card__desc ${expanded ? 'expanded' : ''}`}>
+          {producto.descripcion}
+        </p>
+        {!expanded && producto.descripcion.length > 100 && (
+          <button className="link small" onClick={toggleExpand}>Ver más</button>
+        )}
+        {expanded && (
+          <button className="link small" onClick={toggleExpand}>Ver menos</button>
+        )}
 
-export default CharacterCard
+        <div className="card__meta">
+          <span className="badge">Stock: {producto.stock}</span>
+          <span className="price">$ {producto.precio.toLocaleString()}</span>
+        </div>
+
+        <div className="card__actions">
+          <div className="stepper">
+            <button onClick={decrementar} className="stepper__btn">-</button>
+            <span className="stepper__value">{cantidad}</span>
+            <button onClick={incrementar} className="stepper__btn">+</button>
+          </div>
+          <Button onClick={() => onAgregar(producto, cantidad)} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CharacterCard;
